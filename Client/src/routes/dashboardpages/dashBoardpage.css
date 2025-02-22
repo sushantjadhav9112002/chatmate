@@ -1,0 +1,163 @@
+.dashboardpage {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .texts {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 50%;
+        gap: 50px;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0.2;
+
+            img {
+                width: 64px;
+                height: 64px;
+                display: block; /* Ensure the image is displayed */
+            }
+
+            h1 {
+                font-size: 64px;
+                background: linear-gradient(to right, #217bfe, #e55571);
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+        }
+
+        .options {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+
+            .option {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                gap: 10px;
+                font-weight: 300;
+                font-size: 14px;
+                padding: 10px;
+                border: 1px solid #555;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+
+                img {
+                    width: 40px;
+                    height: 40px;
+                    object-fit: cover;
+                    transition: transform 0.3s ease;
+                }
+
+                &:hover img {
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
+    .formcontainer {
+        width: 40%;
+       
+    }
+    
+    form {
+        width: 100%;
+        
+        height: 60px; /* Fixed height */
+        background-color: rgba(44, 41, 55, 0.8); /* Semi-transparent background */
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        padding: 2%;
+    }
+    
+    input {
+        flex: 1;
+        padding: 15px;
+        background-color: transparent;
+        border: none;
+        outline: none;
+        color: #ececec;
+        font-size: 1rem;
+        border-radius: 10px;
+        caret-color: #ececec;
+        text-align: left; /* Align text inside input to the left */
+    }
+    
+    button {
+        background-color: #605e68;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        margin-left: auto; /* Push button to the rightmost side */
+    }
+    
+    button img {
+        width: 16px;
+        height: 16px;
+    }
+    
+    
+    
+    
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 1280px) {
+        .texts {
+            width: 70%;
+        }
+
+        .formcontainer {
+            width: 70%;
+        }
+    }
+
+    @media screen and (max-width: 1024px) {
+        .texts {
+            width: 90%;
+        }
+
+        .formcontainer {
+            width: 90%;
+        }
+
+        .logo h1 {
+            font-size: 48px;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .texts {
+            width: 100%;
+        }
+
+        .formcontainer {
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .options {
+            flex-direction: column;
+            gap: 20px;
+        }
+    }

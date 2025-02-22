@@ -1,0 +1,93 @@
+/* Signin Page Styles */
+.signinpage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+    margin: 0; /* Remove any default margin */
+}
+
+form {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    color: black;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+input:focus {
+    border-color: #6a11cb;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #6a11cb;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: #2575fc;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+p {
+    color: #555;
+    margin-top: 20px;
+}
+
+span {
+    color: #2575fc;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+span:hover {
+    color: #6a11cb;
+    text-decoration: none;
+}
+
+.signup-link {
+    display: block;
+    margin-top: 15px;
+    color: #2575fc;
+    font-weight: bold;
+}
+
+.signup-link:hover {
+    text-decoration: underline;
+    color: #6a11cb;
+}

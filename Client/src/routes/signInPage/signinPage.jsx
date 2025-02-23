@@ -9,7 +9,6 @@ const SigninPage = () => {
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
-    
     e.preventDefault();
     setError("");
 
@@ -18,7 +17,7 @@ const SigninPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: "include", // Ensures cookies are included in requests
       });
 
       const data = await response.json();
@@ -31,9 +30,10 @@ const SigninPage = () => {
         throw new Error("Authentication token missing in response");
       }
 
+      // Store the token in localStorage
       localStorage.setItem("authToken", data.token);
 
-      // Ensure navigation happens after storage update
+      // Redirect user to the dashboard after login
       setTimeout(() => navigate("/dashboard"), 100);
     } catch (err) {
       console.error("Login error:", err.message);
@@ -42,9 +42,7 @@ const SigninPage = () => {
   };
 
   return (
-    
     <div className="signinpage">
-      
       <form onSubmit={handleSignIn}>
         <h2>Sign In</h2>
         <input
@@ -65,10 +63,7 @@ const SigninPage = () => {
         {error && <p className="error">{error}</p>}
         <p>
           Don't have an account?{" "}
-          <span
-            onClick={() => navigate("/sign-up")}
-            className="signup-link"
-          >
+          <span onClick={() => navigate("/sign-up")} className="signup-link">
             Create one
           </span>
         </p>

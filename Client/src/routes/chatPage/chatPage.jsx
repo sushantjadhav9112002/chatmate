@@ -12,43 +12,57 @@ import 'highlight.js/styles/github-dark.css';
 const ChatPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [chatId, setChatId] = useState(null);
 
-    // Extract chatId properly
-    const [chatId, setChatId] = useState('');
-
+    // ✅ Extract `chatId` properly
     useEffect(() => {
-        const extractedId = location.pathname.split('/').pop();
-        console.log("Extracted chatId:", extractedId); // Debugging
+        console.log("Full location object:", location);
+        console.log("Extracted pathname:", location.pathname);
+
+        const extractedId = location.pathname.split('/').filter(Boolean).pop();
+        console.log("Extracted chatId:", extractedId);
 
         if (!extractedId || extractedId === "undefined" || extractedId === "[object Object]") {
             console.error("Invalid Chat ID. Redirecting...");
-            navigate('/'); // Redirect to home if invalid
+            navigate('/'); // Redirect to home page if invalid
         } else {
             setChatId(extractedId);
         }
     }, [location.pathname, navigate]);
 
-    // Fetch chat data only if chatId is valid
+    // ✅ API call only runs when `chatId` is valid
     const { isPending, error, data } = useQuery({
         queryKey: ['chat', chatId],
         queryFn: async () => {
-            if (!chatId || chatId === "undefined" || chatId === "[object Object]") {
-                throw new Error("Chat ID is missing");
+            if (!chatId) {
+                console.error("Chat ID is missing, aborting API call.");
+                return Promise.reject(new Error("Chat ID is missing"));
             }
 
-            console.log("Fetching chat data for chatId:", chatId);
+            try {
+                console.log("Fetching chat data for chatId:", chatId);
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
-                credentials: "include",
-            });
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+                    method: "GET",
+                    credentials: "include", // Ensures session is sent
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`, // If using token-based auth
+                        "Content-Type": "application/json"
+                    }
+                });
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                if (!response.ok) {
+                    console.error(`API Error: ${response.status} ${response.statusText}`);
+                    return Promise.reject(new Error(`API Error: ${response.status}`));
+                }
+
+                return response.json();
+            } catch (err) {
+                console.error("Fetch error:", err);
+                throw err;
             }
-
-            return response.json();
         },
-        enabled: !!chatId, // Ensures query only runs if chatId is valid
+        enabled: !!chatId, // Prevent API call if chatId is missing
     });
 
     return (
@@ -58,7 +72,7 @@ const ChatPage = () => {
                     {isPending ? (
                         <p>Loading...</p>
                     ) : error ? (
-                        <p>{error.message}</p>
+                        <p>Error: {error.message}</p>
                     ) : Array.isArray(data?.history) ? (
                         data.history.map((message, i) => (
                             <div key={i}>

@@ -1,8 +1,7 @@
-import './chatPage.css';
 import { useEffect } from 'react';
-import NewPrompt from '../../components1/newprompt/NewPrompt';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
+import NewPrompt from '../../components1/newprompt/NewPrompt';
 import { IKImage } from 'imagekitio-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,56 +9,51 @@ import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
 
 const ChatPage = () => {
-    const path = useLocation().pathname;
-    const chatId = path.split('/').pop();
+    const location = useLocation();
     const navigate = useNavigate();
-
+    
+    // ✅ Ensure chatId is properly extracted
+    const chatId = location.pathname.split('/').pop()?.trim();
+    
     useEffect(() => {
-        if (!chatId || chatId === "undefined") {
-            console.error("Chat ID is missing. Redirecting...");
-            navigate('/');
+        if (!chatId || chatId === "undefined" || chatId === "[object Object]") {
+            console.error("Chat ID is missing or invalid:", chatId);
+            navigate('/'); // Redirect to home or an error page
         }
     }, [chatId, navigate]);
-
-    console.log("Using API URL:", import.meta.env.VITE_API_URL);
 
     const { isPending, error, data } = useQuery({
         queryKey: ['chat', chatId],
         queryFn: async () => {
-            if (!chatId || chatId === "undefined") {
-                return Promise.reject(new Error("Chat ID is missing"));
+            if (!chatId || chatId === "undefined" || chatId === "[object Object]") {
+                throw new Error("Invalid Chat ID");
             }
-            console.log("Extracted chatId:", chatId);
 
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`, // Ensure user is authenticated
-                        "Content-Type": "application/json"
-                    }
-                });
+            console.log("Using Chat ID:", chatId);
 
-                if (!response.ok) {
-                    console.error(`API Error: ${response.status} ${response.statusText}`);
-                    return Promise.reject(new Error(`API Error: ${response.status}`));
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+                method: "GET",
+                credentials: "include", // Ensures cookies are sent
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token") || ""}` // If using JWT
                 }
+            });
 
-                return response.json();
-            } catch (err) {
-                console.error("Fetch error:", err);
-                throw err;
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
             }
+
+            return response.json();
         },
-        enabled: !!chatId,
+        enabled: !!chatId, // Prevent API call if chatId is missing
     });
 
     return (
         <div className='chatpage'>
             <div className="wrapper">
                 <div className="chat">
-                    {isPending ? "Loading..." : error ? `Error: ${error.message}` : data?.history?.map((message, i) => (
+                    {isPending ? "Loading..." : error ? "Something went wrong" : data?.history?.map((message, i) => (
                         <div key={i}>
                             {message.img && (
                                 <IKImage

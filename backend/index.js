@@ -91,7 +91,8 @@ app.post("/api/auth/login", async (req, res) => {
         }
 
         const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
-        res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict" })
+        res.cookie("token", token)
+        // res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict" })
            .json({ message: "✅ Login successful", token });
 
     } catch (err) {

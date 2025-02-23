@@ -12,21 +12,20 @@ const Chatlist = () => {
         queryFn: () =>
             fetch(`${import.meta.env.VITE_API_URL}/api/userchats`, {
                 credentials: "include",
-            }).then((res) =>
-                res.json(),
-            ),
+            }).then((res) => res.json()),
     });
 
     // Mutation for deleting a chat
     const deleteChatMutation = useMutation({
-        mutationFn: (chatId) =>
-            fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+        mutationFn: async (chatId) => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
                 method: 'DELETE',
                 credentials: 'include',
-            }).then((res) => res.json()),
+            });
+            return res.json();
+        },
         onSuccess: () => {
             queryClient.invalidateQueries(['userChats']);
-            navigate('/dashboard'); // Redirect to the "Create a new chat" page
         },
     });
 
@@ -46,21 +45,28 @@ const Chatlist = () => {
 
             <span className="title">RECENT CHATS</span>
             <div className="list">
-                {isPending ? "Loading..." : error ? "Something went wrong!" : (data || [])?.map((chat) => (
-                    <div key={chat._id} className="chat-item">
-                        <Link to={`/dashboard/chats/${chat._id}`}>
-                            {chat.title.length > 10 ? chat.title.slice(0, 10) + "..." : chat.title}
-                        </Link>
-
-                        <FaTrash onClick={() => handleDelete(chat._id)} className="delete-icon" />
-                    </div>
-                ))}
+                {isPending ? (
+                    "Loading..."
+                ) : error ? (
+                    "Something went wrong!"
+                ) : Array.isArray(data) ? (
+                    data.map((chat) => (
+                        <div key={chat._id} className="chat-item">
+                            <Link to={`/dashboard/chats/${chat._id}`}>
+                                {chat.title.length > 10 ? chat.title.slice(0, 10) + "..." : chat.title}
+                            </Link>
+                            <FaTrash onClick={() => handleDelete(chat._id)} className="delete-icon" />
+                        </div>
+                    ))
+                ) : (
+                    <p>No chats available.</p>
+                )}
             </div>
             <hr />
             <div className="upgrade">
-                <img src="/logo.png" alt="" />
+                <img src="/logo.png" alt="Upgrade" />
                 <div className="texts">
-                    <span>Upgrade to Sushant's AI pro</span>
+                    <span>Upgrade to Sushant's AI Pro</span>
                     <span>Get unlimited access to all the features</span>
                 </div>
             </div>

@@ -8,6 +8,7 @@ const dashBoardpage = () => {
     const navigate = useNavigate();
 
     const token = localStorage.getItem("token") || "";
+    
 
     const mutation = useMutation({
         mutationFn: async (text) => {
@@ -28,9 +29,9 @@ const dashBoardpage = () => {
             return response.json();
         },
         onSuccess: (data) => {
-            if (data?.id) {  // ✅ Ensure a valid ID is returned
+            if (data) {  // ✅ Ensure a valid ID is returned
                 queryClient.invalidateQueries({ queryKey: ['userChats'] });
-                navigate(`/dashboard/chats/${data.id}`);
+                navigate(`/dashboard/chats/${data}`);
             } else {
                 console.error("Invalid chat ID received from API:", data);
             }

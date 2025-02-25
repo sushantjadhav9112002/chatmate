@@ -51,7 +51,9 @@ const NewPrompt = ({ data }) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['chat', data._id] }).then(() => {
-                formRef.current.reset();
+                if (formRef.current) {
+                    formRef.current.reset();  // Ensure formRef.current is not null
+                }
                 setQuestion("");
                 setAnswer("");
                 setImg({
@@ -62,6 +64,7 @@ const NewPrompt = ({ data }) => {
                 });
             });
         },
+        
         onError: (err) => {
             console.error("Error updating chat:", err);
         }

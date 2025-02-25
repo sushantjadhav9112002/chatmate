@@ -34,7 +34,7 @@ const { isPending, error, data } = useQuery({
             if (!token) {
                 throw new Error("User is not authenticated");
             }
-
+    
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
                 method: 'DELETE',
                 headers: {
@@ -43,17 +43,19 @@ const { isPending, error, data } = useQuery({
                 },
                 credentials: 'include',
             });
-
+    
             if (!response.ok) {
                 throw new Error("Failed to delete chat");
             }
-
+    
             return response.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['userChats']);
+            navigate("/dashboard"); // Redirect to dashboard after deletion
         },
     });
+    
 
     const handleDelete = (chatId) => {
         if (window.confirm('Are you sure you want to delete this chat?')) {

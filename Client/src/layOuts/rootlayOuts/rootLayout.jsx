@@ -8,11 +8,11 @@ const queryClient = new QueryClient();
 const RootLayout = () => {
     const navigate = useNavigate();
     const location = useLocation(); // 👈 Track current route
-    const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("authToken")));
+    const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("token")));
 
     useEffect(() => {
         const checkAuth = () => {
-            setIsAuthenticated(Boolean(localStorage.getItem("authToken")));
+            setIsAuthenticated(Boolean(localStorage.getItem("token")));
         };
 
         // Listen for storage changes (works across tabs and pages)
@@ -24,11 +24,11 @@ const RootLayout = () => {
 
     // 👇 Run whenever route changes (ensures UI updates when navigating)
     useEffect(() => {
-        setIsAuthenticated(Boolean(localStorage.getItem("authToken")));
+        setIsAuthenticated(Boolean(localStorage.getItem("token")));
     }, [location.pathname]); // Track route changes
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
         setIsAuthenticated(false); // Force UI update
         navigate("/sign-in");

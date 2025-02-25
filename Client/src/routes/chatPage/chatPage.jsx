@@ -30,15 +30,25 @@ const chatPage = () => {
             if (!chatId || chatId === "undefined") {
                 console.error("Chat ID is undefined, aborting API call.");
                 return Promise.reject(new Error("Chat ID is missing"));
-
             }
+
             console.log("Extracted chatId:", chatId);
 
             return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`, // 🔹 Add token to request
+                },
                 credentials: "include",
-            }).then((res) => res.json());
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch chat data");
+                }
+                return res.json();
+            });
         },
-        enabled: !!chatId, // Prevent API call if chatId is missing
+        enabled: !!chatId && !!token, // Prevent API call if chatId or token is missing
     });
     
     // const { isPending, error, data } = useQuery({

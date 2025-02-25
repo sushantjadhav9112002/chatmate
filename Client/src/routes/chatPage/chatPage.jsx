@@ -12,23 +12,15 @@ import { useNavigate } from 'react-router-dom';
 // import { useEffect } from 'react';
 
 const chatPage = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
+    const path = useLocation().pathname;
+    const chatId = path.split('/').pop();
+    const navigate = useNavigate(); // 🔹 Move inside the component
 
-    // Extract chatId from query params (if available)
-    const searchParams = new URLSearchParams(location.search);
-    let chatId = searchParams.get("chatId");
-
-    // If not in query params, fallback to pathname
-    if (!chatId) {
-        const pathSegments = location.pathname.split('/');
-        chatId = pathSegments[pathSegments.length - 1];
-    }
 
     useEffect(() => {
-        if (!chatId || chatId === "undefined" || chatId.trim() === "") {
+        if (!chatId || chatId === "undefined") {
             console.error("Chat ID is missing. Redirecting...");
-            navigate('/'); // Redirect to home or error page
+            navigate('/'); // Redirect to home or an error page
         }
     }, [chatId, navigate]);
 
@@ -38,31 +30,31 @@ const chatPage = () => {
             if (!chatId || chatId === "undefined") {
                 console.error("Chat ID is undefined, aborting API call.");
                 return Promise.reject(new Error("Chat ID is missing"));
+
             }
             console.log("Extracted chatId:", chatId);
+
             return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
-                credentials: "include", // Ensures cookies are sent with the request
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Ensure your token is stored and used
-                    "Content-Type": "application/json"
-                }
-            }).then((res) => {
-                if (!res.ok) {
-                    throw new Error(`API Error: ${res.status}`);
-                }
-                return res.json();
-            });
-            
+                credentials: "include",
+            }).then((res) => res.json());
         },
         enabled: !!chatId, // Prevent API call if chatId is missing
     });
+    
+    // const { isPending, error, data } = useQuery({
+    //     queryKey: ['chat', chatId],
+    //     queryFn: () =>
+    //         fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+    //             credentials: "include",
+    //         }).then((res) => res.json()),
+    // });
 
     return (
         <div className='chatpage'>
             <div className="wrapper">
                 <div className="chat">
                     {isPending ? "Loading..." : error ? "Something went wrong" : data?.history?.map((message, i) => (
-                        <div key={i}>
+                        <>
                             {message.img && (
                                 <IKImage
                                     urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
@@ -74,15 +66,16 @@ const chatPage = () => {
                                     lqip={{ active: true, quality: 20 }}
                                 />
                             )}
-                            <div className={message.role === "user" ? "message user" : "message"}>
+                            <div className={message.role === "user" ? "message user" : "message"} key={i}>
                                 <ReactMarkdown 
                                     children={message.parts[0]?.text || ""}
                                     remarkPlugins={[remarkGfm]}
                                     rehypePlugins={[rehypeHighlight]}
                                 />
                             </div>
-                        </div>
+                        </>
                     ))}
+
                     {data && <NewPrompt data={data} />}
                 </div>
             </div>

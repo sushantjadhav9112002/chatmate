@@ -11,7 +11,7 @@ const DashboardLayout = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
 
         if (!token) {
           console.error("No auth token found! Redirecting...");
@@ -23,7 +23,7 @@ const DashboardLayout = () => {
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         if (Date.now() >= tokenPayload.exp * 1000) {
           console.error("Token expired! Logging out...");
-          localStorage.removeItem("authToken");
+          localStorage.removeItem("token");
           navigate("/sign-in");
           return;
         }

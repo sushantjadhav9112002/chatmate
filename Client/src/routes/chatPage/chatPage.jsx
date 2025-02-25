@@ -1,60 +1,49 @@
 import './chatPage.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import NewPrompt from '../../components1/newprompt/NewPrompt';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IKImage } from 'imagekitio-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
-import { useNavigate } from 'react-router-dom';
-// import { useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
-const chatPage = () => {
-    const path = useLocation().pathname;
-    // const chatId = path.split('/').pop();
-    const navigate = useNavigate(); // 🔹 Move inside the component
+const ChatPage = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [chatId, setChatId] = useState("");
 
+    useEffect(() => {
+        const pathSegments = location.pathname.split('/');
+        let extractedChatId = pathSegments[pathSegments.length - 1];
 
-const pathSegments = location.pathname.split('/');
-const chatId = pathSegments[pathSegments.length - 1];
+        if (!extractedChatId || extractedChatId === "undefined" || extractedChatId === "[object Object]") {
+            console.error("Invalid Chat ID detected:", extractedChatId);
+            extractedChatId = uuidv4(); // Generate a new chat ID
+            navigate(`/dashboard/chats/${extractedChatId}`); // Redirect with new chat ID
+        }
 
-useEffect(() => {
-    console.log("Full location object:", location);
-    console.log("Extracted chatId:", chatId);
-
-    if (!chatId || chatId === "undefined" || chatId === "[object Object]") {
-        console.error("Invalid Chat ID detected:", chatId);
-        navigate('/');
-    }
-}, [chatId, navigate, location]);
-
+        setChatId(extractedChatId);
+    }, [location, navigate]);
 
     const { isPending, error, data } = useQuery({
         queryKey: ['chat', chatId],
-        queryFn: () => {
+        queryFn: async () => {
             if (!chatId || chatId === "undefined") {
                 console.error("Chat ID is undefined, aborting API call.");
                 return Promise.reject(new Error("Chat ID is missing"));
-
             }
-            console.log("Extracted chatId:", chatId);
 
-            return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+            console.log("Extracted chatId:", chatId);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
                 credentials: "include",
-            }).then((res) => res.json());
+            });
+            return response.json();
         },
         enabled: !!chatId, // Prevent API call if chatId is missing
     });
-    
-    // const { isPending, error, data } = useQuery({
-    //     queryKey: ['chat', chatId],
-    //     queryFn: () =>
-    //         fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
-    //             credentials: "include",
-    //         }).then((res) => res.json()),
-    // });
 
     return (
         <div className='chatpage'>
@@ -90,4 +79,4 @@ useEffect(() => {
     );
 };
 
-export default chatPage;
+export default ChatPage;

@@ -7,23 +7,39 @@ const dashBoardpage = () => {
     const queryClient = useQueryClient();  // Use useQueryClient instead of creating a new QueryClient
     const navigate = useNavigate();
 
+    const token = localStorage.getItem("token") || "";
+
     const mutation = useMutation({
-        mutationFn: (text) => {
-            return fetch(`${import.meta.env.VITE_API_URL}/api/chats`, {
+        mutationFn: async (text) => {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
+                    ...(token && { "Authorization": `Bearer ${token}` })  // ✅ Send only if token exists
                 },
                 body: JSON.stringify({ text }),
-            }).then(res => res.json());
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);  // ✅ Handle API errors properly
+            }
+
+            return response.json();
         },
-        onSuccess: (id) => {
-            // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ['userChats'] });
-            navigate(`/dashboard/chats/${id}`);
+        onSuccess: (data) => {
+            if (data?.id) {  // ✅ Ensure a valid ID is returned
+                queryClient.invalidateQueries({ queryKey: ['userChats'] });
+                navigate(`/dashboard/chats/${data.id}`);
+            } else {
+                console.error("Invalid chat ID received from API:", data);
+            }
         },
+        onError: (error) => {
+            console.error("Error creating chat:", error);
+        }
     });
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

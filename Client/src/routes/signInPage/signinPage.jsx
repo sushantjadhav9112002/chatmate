@@ -9,6 +9,8 @@ const SigninPage = () => {
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
+    console.log(localStorage.getItem("token"));
+
     
     e.preventDefault();
     setError("");

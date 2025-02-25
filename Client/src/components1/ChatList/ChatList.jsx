@@ -7,22 +7,48 @@ const Chatlist = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate(); // Initialize useNavigate hook
 
-    const { isPending, error, data } = useQuery({
-        queryKey: ['userChats'],
-        queryFn: () =>
-            fetch(`${import.meta.env.VITE_API_URL}/api/userchats`, {
-                credentials: "include",
-            }).then((res) => res.json()),
-    });
+    // Retrieve token from localStorage
+    const token = localStorage.getItem("token"); // Get token
+
+const { isPending, error, data } = useQuery({
+    queryKey: ['userChats'],
+    queryFn: () =>
+        fetch(`${import.meta.env.VITE_API_URL}/api/userchats`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`, // Add token to request
+            },
+            credentials: "include",
+        }).then((res) => {
+            if (!res.ok) {
+                throw new Error("Failed to fetch user chats");
+            }
+            return res.json();
+        }),
+});
 
     // Mutation for deleting a chat
     const deleteChatMutation = useMutation({
         mutationFn: async (chatId) => {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
+            if (!token) {
+                throw new Error("User is not authenticated");
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
                 method: 'DELETE',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
                 credentials: 'include',
             });
-            return res.json();
+
+            if (!response.ok) {
+                throw new Error("Failed to delete chat");
+            }
+
+            return response.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['userChats']);
@@ -48,8 +74,8 @@ const Chatlist = () => {
                 {isPending ? (
                     "Loading..."
                 ) : error ? (
-                    "Something went wrong!"
-                ) : Array.isArray(data) ? (
+                    <p className="error">Something went wrong: {error.message}</p>
+                ) : Array.isArray(data) && data.length > 0 ? (
                     data.map((chat) => (
                         <div key={chat._id} className="chat-item">
                             <Link to={`/dashboard/chats/${chat._id}`}>

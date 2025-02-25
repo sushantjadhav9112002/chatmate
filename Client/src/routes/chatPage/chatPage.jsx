@@ -15,6 +15,7 @@ const chatPage = () => {
     const path = useLocation().pathname;
     const chatId = path.split('/').pop();
     const navigate = useNavigate(); // 🔹 Move inside the component
+    const token = localStorage.getItem("token"); // 🔹 Get token from localStorage
 
 
     useEffect(() => {

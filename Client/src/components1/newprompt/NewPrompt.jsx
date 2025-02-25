@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 const NewPrompt = ({ data }) => {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState("");
+    const token = localStorage.getItem("token"); // 🔹 Get token from localStorage
     const [img, setImg] = useState({
         isLoading: false,
         error: "",
@@ -39,6 +40,7 @@ const NewPrompt = ({ data }) => {
                 credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`, // 🔹 Add token to request
                 },
                 body: JSON.stringify({
                     question: question.length ? question : undefined,

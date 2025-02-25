@@ -41,8 +41,18 @@ const chatPage = () => {
             }
             console.log("Extracted chatId:", chatId);
             return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${chatId}`, {
-                credentials: "include",
-            }).then((res) => res.json());
+                credentials: "include", // Ensures cookies are sent with the request
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Ensure your token is stored and used
+                    "Content-Type": "application/json"
+                }
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error(`API Error: ${res.status}`);
+                }
+                return res.json();
+            });
+            
         },
         enabled: !!chatId, // Prevent API call if chatId is missing
     });

@@ -190,6 +190,11 @@ app.delete("/api/chats/:id", authenticateUser, async (req, res) => {
     }
 });
 
+app.use((req, res, next) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+  
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     res.status(500).json({ error: "❌ Internal Server Error", details: err.message });

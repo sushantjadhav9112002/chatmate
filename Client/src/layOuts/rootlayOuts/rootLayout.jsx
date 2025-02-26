@@ -1,22 +1,13 @@
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import "./rootLayout.css";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import './rootLayout.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
 const RootLayout = () => {
-    return (
-        <QueryClientProvider client={queryClient}>
-            <RootLayoutContent />
-        </QueryClientProvider>
-    );
-};
-
-const RootLayoutContent = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const queryClient = useQueryClient(); // ✅ Now inside QueryClientProvider
+    const location = useLocation(); // 👈 Track current route
     const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("token")));
 
     useEffect(() => {
@@ -24,48 +15,47 @@ const RootLayoutContent = () => {
             setIsAuthenticated(Boolean(localStorage.getItem("token")));
         };
 
-        // Listen for storage changes
+        // Listen for storage changes (works across tabs and pages)
         const handleStorageChange = () => checkAuth();
         window.addEventListener("storage", handleStorageChange);
 
         return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
+    // 👇 Run whenever route changes (ensures UI updates when navigating)
     useEffect(() => {
         setIsAuthenticated(Boolean(localStorage.getItem("token")));
-
-        // ✅ **Refetch all queries on page refresh**
-        queryClient.refetchQueries(); 
-
-    }, [location.pathname]);
+    }, [location.pathname]); // Track route changes
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        setIsAuthenticated(false);
+        setIsAuthenticated(false); // Force UI update
         navigate("/sign-in");
     };
 
     return (
-        <div className="rootLayout">
-            <header>
-                <Link to="/" className="logo">
-                    <img src="/logo.png" alt="Logo" />
-                    <span>Sushant's AI</span>
-                </Link>
-                <div className="user">
-                    {isAuthenticated ? (
-                        <button onClick={handleLogout}>Logout</button>
-                    ) : (
-                        <button><Link to="/sign-in">Login</Link></button>
-                    )}
-                </div>
-            </header>
+        <QueryClientProvider client={queryClient}>
+            <div className="rootLayout">
+                <header>
+                    <Link to="/" className="logo">
+                        <img src="/logo.png" alt="Logo" />
+                        <span>Sushant's AI</span>
+                    </Link>
+                    <div className="user">
+                        {isAuthenticated ? (
+                            <button onClick={handleLogout}>Logout</button>
+                        ) : (
+                            <button><Link to="/sign-in">Login</Link></button>
+                        )}
+                    </div>
+                </header>
 
-            <main>
-                <Outlet />
-            </main>
-        </div>
+                <main>
+                    <Outlet />
+                </main>
+            </div>
+        </QueryClientProvider>
     );
 };
 

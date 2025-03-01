@@ -8,6 +8,15 @@
     
 }
 
+
+.responsive-image {
+    width: 70%; /* Make the image take up the full width of its container */
+    max-width: 600px; /* Set a maximum width */
+    height: 60%; /* Maintain aspect ratio */
+    border-radius: 10px; /* Optional: Add rounded corners */
+    margin: 10px 0; /* Optional: Add some margin */
+}
+
 .chatpage, .wrapper {
     opacity: 1 !important;
 }

@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 const NewPrompt = ({ data }) => {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState("");
-    const token = localStorage.getItem("token"); // 🔹 Get token from localStorage
     const [img, setImg] = useState({
         isLoading: false,
         error: "",
@@ -30,30 +29,28 @@ const NewPrompt = ({ data }) => {
     const queryClient = useQueryClient();
 
     useEffect(() => {
-        endRef.current.scrollIntoView({ behavior: "smooth" });
+        endRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [data, question, answer, img.dbData]);
 
     const mutation = useMutation({
         mutationFn: () => {
+            if (!data?._id) {
+                console.error("Chat ID is undefined, preventing API call.");
+                return Promise.reject("Chat ID is undefined.");
+            }
             return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${data._id}`, {
                 method: "PUT",
                 credentials: 'include',
-                headers: {
+                headers: { 
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`, // 🔹 Add token to request
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },
-                body: JSON.stringify({
-                    question: question.length ? question : undefined,
-                    answer,
-                    img: img.dbData?.filePath || undefined,
-                }),
+                body: JSON.stringify({ question, answer, img: img.dbData?.filePath }),
             }).then(res => res.json());
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['chat', data._id] }).then(() => {
-                if (formRef.current) {
-                    formRef.current.reset();  // Ensure formRef.current is not null
-                }
+                formRef.current?.reset();
                 setQuestion("");
                 setAnswer("");
                 setImg({
@@ -64,7 +61,6 @@ const NewPrompt = ({ data }) => {
                 });
             });
         },
-        
         onError: (err) => {
             console.error("Error updating chat:", err);
         }
@@ -105,15 +101,28 @@ const NewPrompt = ({ data }) => {
         hasRun.current = true;
     }, [data]);
 
+    // Debugging logs
+    useEffect(() => {
+        if (img.dbData?.filePath) {
+            console.log("Image filePath:", img.dbData.filePath);
+            console.log("ImageKit URL Endpoint:", import.meta.env.VITE_IMAGE_KIT_ENDPOINT);
+        }
+    }, [img.dbData]);
+
     return (
         <>
             {img.isLoading && <div>Loading...</div>}
             {img.dbData?.filePath && (
                 <IKImage
                     urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-                    path={img.dbData?.filePath}
-                    width="380"
-                    transformation={[{ width: 380 }]}
+                    path={img.dbData.filePath}
+                    // width={380}
+                    // height={200}
+                    // transformation={[{width:380}]}
+                    // transformation={[{height: 150, width: 200}]}
+                    className='responsive-image'
+                    loading="lazy" // Add lazy loading for better performance
+                    onError={(e) => console.error("Image failed to load:", e)} // Log errors
                 />
             )}
 
@@ -129,7 +138,6 @@ const NewPrompt = ({ data }) => {
                     <img src="/arrow.png" alt="Send" />
                 </button>
             </form>
-
         </>
     );
 };

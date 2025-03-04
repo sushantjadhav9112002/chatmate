@@ -5,15 +5,14 @@ import { useNavigate } from "react-router-dom";
 const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
-    console.log(localStorage.getItem("token"));
-
-    
     e.preventDefault();
-    setError("");
+    setMessage({ text: "", type: "" });
+    setLoading(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
@@ -24,9 +23,10 @@ const SigninPage = () => {
       });
 
       const data = await response.json();
+      setLoading(false);
 
       if (!response.ok) {
-        throw new Error(data.error || "Invalid credentials");
+        throw new Error(data.error || "Invalid email or password");
       }
 
       if (!data.token) {
@@ -35,18 +35,17 @@ const SigninPage = () => {
 
       localStorage.setItem("token", data.token);
 
-      // Ensure navigation happens after storage update
-      setTimeout(() => navigate("/dashboard"), 100);
+      setMessage({ text: "Login successful! Redirecting...", type: "success" });
+
+      // Redirect after a short delay
+      setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
-      console.error("Login error:", err.message);
-      setError(err.message);
+      setMessage({ text: err.message, type: "error" });
     }
   };
 
   return (
-    
     <div className="signinpage">
-      
       <form onSubmit={handleSignIn}>
         <h2>Sign In</h2>
         <input
@@ -63,8 +62,10 @@ const SigninPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Sign In</button>
-        {error && <p className="error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing In..." : "Sign In"}
+        </button>
+        {message.text && <p className={message.type}>{message.text}</p>}
         <p>
           Don't have an account?{" "}
           <span

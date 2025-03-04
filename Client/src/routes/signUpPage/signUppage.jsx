@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 const Signuppage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState({ text: '', type: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setError('');
+    setMessage({ text: '', type: '' });
+    setLoading(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
@@ -20,14 +22,17 @@ const Signuppage = () => {
         credentials: 'include',
       });
 
+      const data = await response.json();
+      setLoading(false);
+
       if (!response.ok) {
-        throw new Error('Registration failed');
+        throw new Error(data.message || 'Registration failed. Please try again.');
       }
 
-      alert('Account created successfully!');
-      navigate('/sign-in');
+      setMessage({ text: 'Account created successfully! Redirecting...', type: 'success' });
+      setTimeout(() => navigate('/sign-in'), 2000);
     } catch (err) {
-      setError(err.message);
+      setMessage({ text: err.message, type: 'error' });
     }
   };
 
@@ -49,8 +54,10 @@ const Signuppage = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Sign Up</button>
-        {error && <p className="error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Signing Up...' : 'Sign Up'}
+        </button>
+        {message.text && <p className={message.type}>{message.text}</p>}
         <p>
           Already have an account?{' '}
           <span
